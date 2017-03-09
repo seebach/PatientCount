@@ -1,0 +1,9 @@
+Category;Product;Value;Month;Treatment
+On Demand;NovoSeven;1153;Jan;Congenital Haemophilia
+On Demand;PD-aPCC;381;Jan;Congenital Haemophilia
+;On Demand;Combo with Novo Seven;181;Jan;Congenital Haemophilia
+On Demand;Combo without Novo Seven;0;Jan;Congenital Haemophilia
+Prophylaxis;NovoSeven with NovoSeven BTB;262;Jan;Congenital Haemophilia
+Prophylaxis;NovoSeven with other BTB;0;Jan;Congenital Haemophilia
+Prophylaxis;PD-aPCC with NovoSeven BTB;275;Jan;Congenital Haemophilia
+Prophylaxis;PD-aPCC with other BTB;0;Jan;Congenital Haemophilia

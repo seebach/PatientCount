@@ -1,0 +1,25 @@
+D1,D2,D3,Product,Orientation
+Congenital Haemophilia,Start Treatment,On Demand,NovoSeven,V
+Congenital Haemophilia,Start Treatment,On Demand,PD-aPCC,V
+Congenital Haemophilia,Start Treatment,On Demand,Combo with Novo Seven,V
+Congenital Haemophilia,Start Treatment,On Demand,Combo without Novo Seven,V
+Congenital Haemophilia,Start Treatment,Prophylaxis,NovoSeven with NovoSeven BTB,V
+Congenital Haemophilia,Start Treatment,Prophylaxis,NovoSeven with other BTB,V
+Congenital Haemophilia,Start Treatment,Prophylaxis,PD-aPCC with NovoSeven BTB,V
+Congenital Haemophilia,Start Treatment,Prophylaxis,PD-aPCC with other BTB,V
+Congenital Haemophilia,Start Treatment,Prophylaxis,New Product,V
+Congenital Haemophilia,Start Treatment,Lost,Lost,V
+Congenital Haemophilia,Start Treatment,PUP,PUP,V
+Congenital Haemophilia,Start Treatment,Previously tolerized,Previously tolerized,V
+Congenital Haemophilia,Switch to,On Demand,NovoSeven,H
+Congenital Haemophilia,Switch to,On Demand,PD-aPCC,H
+Congenital Haemophilia,Switch to,On Demand,Combo with Novo Seven,H
+Congenital Haemophilia,Switch to,On Demand,Combo without Novo Seven,H
+Congenital Haemophilia,Switch to,Prophylaxis,NovoSeven with NovoSeven BTB,H
+Congenital Haemophilia,Switch to,Prophylaxis,NovoSeven with other BTB,H
+Congenital Haemophilia,Switch to,Prophylaxis,PD-aPCC with NovoSeven BTB,H
+Congenital Haemophilia,Switch to,Prophylaxis,PD-aPCC with other BTB,H
+Congenital Haemophilia,Switch to,Prophylaxis,New Product,H
+Congenital Haemophilia,Switch to,Lost,Lost,H
+Congenital Haemophilia,Switch to,Lost to trials,Lost to trials,H
+Congenital Haemophilia,Switch to,Lost to tolerization,Lost to tolerization,H
