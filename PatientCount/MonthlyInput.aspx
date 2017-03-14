@@ -321,8 +321,9 @@
                                 <li class="active" ><a href="MonthlyInput.aspx">Input</a></li>
                                 <li ><a href="Analytics/index.html">Reports</a></li>                                    
                             </ul>
-                            <ul class="nav navbar-nav navbar-right">                               
-                                <li ><a href="administration.aspx">Administration</a></li>                            
+                            <ul class="nav navbar-nav navbar-right" >    
+                                <%=administrationLink %>                           
+                                <!-- <li ><a href="administration.aspx">Administration</a></li> -->                        
                             </ul>
                         </div>                  
                     </div>             

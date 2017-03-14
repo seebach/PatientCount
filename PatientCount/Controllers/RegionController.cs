@@ -26,6 +26,7 @@ namespace PatientCount.Controllers
         [Route("api/region")]
         [HttpGet]
         [HttpPost]
+        // [Authorize] // incomment to force authentication
         public IHttpActionResult Region()
         {
             var request = HttpContext.Current.Request;

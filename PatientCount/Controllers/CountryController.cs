@@ -14,6 +14,7 @@ namespace PatientCount.Controllers
         [Route("api/country")]
         [HttpGet]
         [HttpPost]
+        // [Authorize] // incomment to force authentication
         public IHttpActionResult Join()
         {
             var request = HttpContext.Current.Request;

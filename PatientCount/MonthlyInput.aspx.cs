@@ -5,9 +5,14 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+using System.Net;
+using System.Net.Http;
+using System.Web.Http;
 using System.IO;
 using System.Data.SqlClient;
 using System.Collections;
+using System.Diagnostics;
+
 
 namespace PatientCount
 {
@@ -25,9 +30,23 @@ namespace PatientCount
 
         int numberOfProduct = 0;
         string dbConnection = string.Empty;
+        public string administrationLink;
+
+        public User currentUser = new User();
+
 
         protected void Page_Load(object sender, EventArgs e)
         {
+
+            // get the user
+            // private string UserName = HttpContext.Current.User.Identity.Name.ToString();
+            //User currentUser = new PatientCount.User();
+            Console.WriteLine("useradmin " + currentUser.IsAdmin);
+            Console.WriteLine("username " + currentUser.UserName);
+
+            if (currentUser.IsAdmin == 1) {
+                administrationLink = "<li ><a href = \"administration.aspx\" > Administration </ a ></ li >";
+            }
             // Create dataconnection
             dbConnection = Properties.Settings.Default.dbConnection;
 
@@ -376,17 +395,18 @@ namespace PatientCount
         {
 
             DataTable subjects = new DataTable();
-
            
 
             using (SqlConnection con = new SqlConnection(connectionString))
-            {
-
+            {   
+                
                 try
                 {
-                    SqlDataAdapter adapter = new SqlDataAdapter("SELECT  [id],[Country] FROM[PCM].[dbo].[Countries] Where Active = 1 Order by Country", con);
+                    SqlDataAdapter adapter = new SqlDataAdapter("SELECT  c.[id],c.[Country] FROM [PCM].[dbo].[Countries] c JOIN[PCM].[dbo].UserCountry uc on uc.CountryId = c.id JOIN[PCM].[dbo].PCMUsers u on u.id = uc.UserId Where Active = 1 AND Upper(u.UserName) = Upper(@UserName) Order by Country", con);
+                    adapter.SelectCommand.Parameters.AddWithValue("@UserName", currentUser.UserName);
                     adapter.Fill(subjects);
 
+//                    UserName = "test";
                     countriesDdl.DataSource = subjects;
                     countriesDdl.DataTextField = "Country";
                     countriesDdl.DataValueField = "id";
