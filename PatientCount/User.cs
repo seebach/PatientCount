@@ -29,47 +29,41 @@ namespace PatientCount
             private set { _IsAdmin = value; }
         }
         
-
-        public User()
-        {
-           
-             // get the user
-            UserName = HttpContext.Current.User.Identity.Name.ToString();
-            string dbConnection = Properties.Settings.Default.dbConnection;
-            
-                using (SqlConnection conn = new SqlConnection(dbConnection))
-                {
-                try
-                {
-
-                    string sql = @"SELECT top 1 id as UserID,UserName,IsUser,IsAdmin from[PCM].[dbo].PCMUsers Where Upper(UserName) = Upper('@UserName') AND IsUser = 1";
-
-                    using (SqlCommand comm = new SqlCommand(sql, conn))
-                    {
-                        conn.Open();
-
-                        comm.Parameters.AddWithValue("@UserName", UserName);
-
-                        using (var reader = comm.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                IsUser = Convert.ToInt32(reader.GetBoolean(2));
-                                IsAdmin = Convert.ToInt32(reader.GetBoolean(3));
-                                Console.WriteLine("username" + reader.GetOrdinal("UserName"));
-                            }
-                           
-                        }
-                        }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("sql problem: "+ex.Message);
-                }
-            }
-
-
-            }
         
+        public User(string _UserName)
+        {
+            UserName = _UserName;
+            // set default in case user is not found
+            IsUser = -1;
+            IsAdmin = -1;
+
+            using (SqlConnection conn = new SqlConnection(Properties.Settings.Default.dbConnection))
+            {
+                conn.Open();
+
+                string sql = @"SELECT top 1 Convert(int,IsUser) as IsUser,Convert(int,IsAdmin) as IsAdmin from[PCM].[dbo].PCMUsers Where Upper(UserName) = Upper(@UserName) AND IsUser = 1";
+                
+                using (SqlCommand comm = new SqlCommand(sql, conn))
+                {
+                    comm.Parameters.AddWithValue("@UserName", UserName);
+
+                    using (var reader =  comm.ExecuteReader())
+                    {
+                        // if no user exists keep default values
+                        if (!reader.Read())
+                            return;
+                                //throw new Exception("Something is very wrong");
+                            
+                        int __IsAdmin = reader.GetOrdinal("IsAdmin");
+                        int __IsUser = reader.GetOrdinal("IsUser");
+
+                        this.IsAdmin = reader.GetInt32(__IsAdmin);
+                       this.IsUser = reader.GetInt32(__IsUser);
+                    }
+                }
+            }
+                        
+        }
+
     }
 }

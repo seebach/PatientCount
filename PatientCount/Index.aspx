@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Index.aspx.cs" Inherits="PatientCount.WebForm1" %>
+
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
@@ -23,13 +25,14 @@
 	<script type="text/javascript" src="https://cdn.datatables.net/select/1.2.0/js/dataTables.select.min.js"></script>	
 	<script type="text/javascript" src="js/dataTables.editor.min.js"></script>
 	
-
+   
 
 </head>
 <body>
 
   
- 
+     <form id="form1" runat="server">
+
           
             <nav class="navbar navbar-default navbar-top" style="margin-bottom:2px">
                     <div class="container">
@@ -42,16 +45,17 @@
                                 <li ><a href="MonthlyInput.aspx">Input</a></li>
                                 <li ><a href="Analytics/index.html">Reports</a></li>                                    
                             </ul>
-                            <ul class="nav navbar-nav navbar-right">                               
-                                <li ><a href="Administration.aspx">Administration</a></li>                            
+                            <ul class="nav navbar-nav navbar-right">   
+                                   <%=administrationLink %>                           
+                            
                             </ul>
                         </div>                  
                     </div>             
             </nav>
-
         <div class="container"> 
-            
-             
+           
+                       <div class="alert alert-danger" id="message" style="display:none"></div>
+
                         
                   
             <section  >
@@ -112,6 +116,21 @@ For assistance, training and additional support please contact TKHE and SKEY
              </div>
              </section>
              </div>
-
+         </form>
+     <script >
+        $.urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            return results[1] || 0;
+        }
+        // Get URL
+        var url = window.location.href;
+        // Check if URL contains the keyword
+        if (url.search('message') > 0) {
+            // Display the message
+            $('#message').show();
+            $('#message').html('<strong>Warning!</strong>' + ($.urlParam('message')));
+        }
+    </script>
 </body>
 </html>
+

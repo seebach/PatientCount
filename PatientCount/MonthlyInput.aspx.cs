@@ -5,13 +5,8 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Net;
-using System.Net.Http;
-using System.Web.Http;
-using System.IO;
 using System.Data.SqlClient;
 using System.Collections;
-using System.Diagnostics;
 
 
 namespace PatientCount
@@ -32,20 +27,19 @@ namespace PatientCount
         string dbConnection = string.Empty;
         public string administrationLink;
 
-        public User currentUser = new User();
-
-
+        public User currentUser = new User(HttpContext.Current.User.Identity.Name.ToString());
+        
+        
         protected void Page_Load(object sender, EventArgs e)
         {
 
-            // get the user
-            // private string UserName = HttpContext.Current.User.Identity.Name.ToString();
-            //User currentUser = new PatientCount.User();
-            Console.WriteLine("useradmin " + currentUser.IsAdmin);
-            Console.WriteLine("username " + currentUser.UserName);
-
             if (currentUser.IsAdmin == 1) {
                 administrationLink = "<li ><a href = \"administration.aspx\" > Administration </ a ></ li >";
+            }
+            if (currentUser.IsUser != 1)
+            {
+                // if user does not have access send him to the index page
+                Response.Redirect("index.aspx?message=forbidden+you%27re+not+allowed+access+to+this+input+page");
             }
             // Create dataconnection
             dbConnection = Properties.Settings.Default.dbConnection;

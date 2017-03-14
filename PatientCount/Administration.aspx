@@ -382,7 +382,7 @@ $(document).ready(function () {
                          </div>                   
                         <div id="navbar" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav">                             
-                                <li ><a href="Index.html">Home</a></li>
+                                <li ><a href="Index.aspx">Home</a></li>
                                 <li ><a href="MonthlyInput.aspx">Input</a></li>
                                 <li ><a href="Analytics/index.html">Reports</a></li>                                    
                             </ul>
