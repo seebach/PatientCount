@@ -2,6 +2,10 @@ body {
     overflow-y: auto;
 }
 
+.glyphicon {
+     padding-top: 40px;
+}
+
 .removebtn-ui {
     padding: 0px;
     position: absolute;
@@ -140,9 +144,13 @@ body {
   max-height: 60vh;
   overflow-y: scroll;
 }
+.qs-sheet-wrapper {
+      margin:2px;
+      min-height:20px;
+      max-height:100px;
+}
 .qs-sheet-preview {
   height: 80px;
-  margin:2px;
   border: 2px solid #dadada;
   border-radius: 7px;
   box-shadow: 0 0 10px #dadada;

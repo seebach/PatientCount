@@ -16,7 +16,7 @@ namespace PatientCount
         {
             if (currentUser.IsAdmin == 1)
             {
-                administrationLink = "<li ><a href = \"administration.aspx\" > Administration </ a ></ li >";
+                administrationLink = "<a href = \"administration.aspx\" > Administration </a>";
             }
         }
     }

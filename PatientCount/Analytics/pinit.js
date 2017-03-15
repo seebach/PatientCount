@@ -262,7 +262,7 @@ $(document).ready(function() {
             $.each(reply.qAppObjectList.qItems, function(key, sheet) {
 
                 // $("#Sheets").append($('<option></option>').val(sheet.qMeta.title).attr('data-sheet-guid', sheet.qInfo.qId).html(sheet.qMeta.title));
-                $("#qs-sheet-overview").append('<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3 qs-sheet-preview" data-sheet-guid="' + sheet.qInfo.qId + '"  data-sheet-number="' + count + '" >' + sheet.qMeta.title + '<br/><i>' + sheet.qMeta.description + '</i></div>');
+                $("#qs-sheet-overview").append('<div class="col-xs-6 col-sm-6 col-md-4 col-lg-3 qs-sheet-wrapper"><div class="qs-sheet-preview" data-sheet-guid="' + sheet.qInfo.qId + '"  data-sheet-number="' + count + '" >' + sheet.qMeta.title + '<br/><i>' + sheet.qMeta.description + '</i></div></div>');
                 sheetList.push(sheet.qInfo.qId);
                 $.each(sheet.qData.cells, function(index, value) {
                     if ('type' in value) {

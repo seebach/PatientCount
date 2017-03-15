@@ -46,8 +46,7 @@
                                 <li ><a href="Analytics/index.html">Reports</a></li>                                    
                             </ul>
                             <ul class="nav navbar-nav navbar-right">   
-                                   <%=administrationLink %>                           
-                            
+                                 <li> <%=administrationLink %>   </li>                         
                             </ul>
                         </div>                  
                     </div>             
