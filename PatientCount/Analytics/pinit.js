@@ -9,14 +9,11 @@ var DBitems = [];
 var sheetList = [];
 // keeps track of the sheet we have navigated to
 var sheetCounter = 0;
+// array for selected guid
+var selection = [];
 
 $(document).ready(function() {
 
-    /*  $( function() {
-         $( "#sortable" ).sortable();
-         $( "#sortable" ).disableSelection();
-       } );
-    */
     var prefix = '/';
     var config = {
         host: qlikServer,
@@ -75,8 +72,10 @@ $(document).ready(function() {
             return html;
         }
 
-        function insertQlikObj(lastid, qsid, saveToStorage, options) {
+        function insertQlikObj(lastid, qsid, options) {
             log("insert: " + qsid);
+            if ( $('#qs-container-'+qsid).length < 1  ){
+
             $(lastid).before('<div id="placeholder-'+qsid+'" />');
             var elementid = 'QV' + objectCounter;
             var type;
@@ -97,25 +96,45 @@ $(document).ready(function() {
                 }
             });
             objectCounter++;
-            if (saveToStorage === true) {
-                updateObjects();
-            };
+        } else {
+            log("object already exists: " + qsid);
+        }
         }
 
         $("#insertId").click(function() {
             $.each(selection, (function(index, value) {
                 var qsid = value;
-                insertQlikObj('#addRow', qsid, true, {
+                insertQlikObj('#addRow', qsid, {
                     "noInteraction": true,
                     "noSelections": true
                 });
             }));
-
+            // find objects that we don't want anymore
+            $('.qs-objectlist').each(function() {
+                //$(this).data('qsid')
+                var id = $(this).data('qsid');
+                console.log ($(this).data('qsid'));
+                var result = 0;
+                $.each(selection, (function(index, value) {
+                    console.log(value+' '+id)
+                    if(value === id ) { 
+                        result = 1; 
+                    }
+                }));
+                // object does not exist so remove it
+                if (result === 0) {
+                    console.log($(this).data('qsid'));
+                    $('#qs-container-' + $(this).data('qsid')).remove();
+                }
+                //selection.push($(this).data('qsid'));
+            });
             // reset the selections array
-            $('#qs-sheet-view').empty();
+            $('#qs-sheet-view').html("");
             selection = [];
             //$('#Sheets').find('selected').remove()
             $('#Sheets').prop('selectedIndex', -1);
+            setTimeout(function(){ updateObjects(); }, 3000);
+
         });
 
         $(document).on('click', ".removebtn", function() {
@@ -123,8 +142,7 @@ $(document).ready(function() {
             updateObjects();
         });
 
-        // array for selected guid
-        var selection = [];
+
 
         function showSheetObjects(sheetGuid) {
             //    var sheetGuid = $("#Sheets option:selected").data("sheetGuid");
@@ -134,6 +152,7 @@ $(document).ready(function() {
 
             app.getObject(sheetGuid).then(function(model) {
                 model.layout.cells.map(function(d) {
+                        console.log("render 1:"+d.name);
                         return {
                             id: d.name,
                             top: d.row * rowSize,
@@ -143,6 +162,8 @@ $(document).ready(function() {
                         }
                     })
                     .forEach(function(d) {
+                         console.log("render 2:"+d.id);
+
                         $('#qs-sheet-view').append('<div class="preview-wrapper" id="preview-' + d.id + '" ><span id="select-' + d.id + '" class="glyphicon glyphicon-ok selectedIcon" ></span><div id="show-' + d.id + '" ></div></div>');
                         $('#preview-' + d.id).css({
                             top: 'calc(' + d.top + '%)',
@@ -198,8 +219,14 @@ $(document).ready(function() {
 
             $('#QSZOOM').empty();
             app.getObject('QSZOOM', qsid);
-            // dirty hack to force rerender
-            //var height = ((Math.random() - 0.5) * 2) + $('#QSZOOM').height();
+            // attach the sheet to the show details button
+            var sheetId = SheetObjects.filter(function( obj ) {
+                    if( obj.guid === qsid )
+                       { return obj.sheetGuid; }
+            }) ;
+            $(document).on('click', "#show-details", function() {
+                window.open(  (config.isSecure ? "https://" : "https://") + config.host + (config.port ? ":" + config.port : "") + "/sense/app/"+appid +'/sheet/'+sheetId[0].sheetGuid);
+            });
             qlik.resize();
             $('#QSZOOM').show();
             $('#QSZOOM').resize();
@@ -218,8 +245,15 @@ $(document).ready(function() {
         }
 
         $(document).on('click', "#addRow", function() {
+            // create fresh list of all selected objects 
+            selection = [];
+            $('.qs-objectlist').each(function() {
+                selection.push($(this).data('qsid'));
+            });
             $('#modal-content').modal('show');
+            $('#qs-sheet-overview').show();
             $("#objectIds").trigger("change");
+
             toogleSheetNavigation('remove');
         });
         $(document).on('click', ".qs-sheet-preview", function() {
@@ -233,7 +267,9 @@ $(document).ready(function() {
         });
         $(document).on('click', "#qs-sheet-show-overview", function() {
             $("#qs-sheet-overview").show();
-            $("#qs-sheet-view").hide();
+            $("#qs-sheet-view").html("");
+ 
+            log(selection);
             toogleSheetNavigation('remove');
             sheetCounter = 0;
         });
@@ -276,11 +312,12 @@ $(document).ready(function() {
                 });
                 count++;
             });
+            console.log(SheetObjects);
         });
             $.getJSON( apiServer+"/api/User", function(data) {
                   $.each(JSON.parse(data.QlikObjects),function(index,qid) {
                     console.log(qid);
-                    insertQlikObj('#addRow', qid, false, {
+                    insertQlikObj('#addRow', qid, {
                         "noInteraction": true,
                         "noSelections": true
                     });
