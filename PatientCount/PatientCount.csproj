@@ -122,6 +122,7 @@
     <Content Include="Analytics\style.css" />
     <Content Include="css\bootstrap.css" />
     <Content Include="css\editor.dataTables.min.css" />
+    <Content Include="css\nn.css" />
     <Content Include="css\PatientCount.css" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.woff" />

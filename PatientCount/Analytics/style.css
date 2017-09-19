@@ -221,4 +221,6 @@ body {
 .float-left {
   float: left;
 }
-#filters {}
+.filters {
+    height:200px;
+}

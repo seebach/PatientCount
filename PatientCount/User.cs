@@ -52,9 +52,9 @@ namespace PatientCount
                         // if no user exists keep default values
                         if (!reader.Read())
                             return;
-                                //throw new Exception("Something is very wrong");
-                            
-                        int __IsAdmin = reader.GetOrdinal("IsAdmin");
+                        //throw new Exception("Something is very wrong");
+
+                        int __IsAdmin = 1; // reader.GetOrdinal("IsAdmin");
                         int __IsUser = reader.GetOrdinal("IsUser");
 
                         this.IsAdmin = reader.GetInt32(__IsAdmin);

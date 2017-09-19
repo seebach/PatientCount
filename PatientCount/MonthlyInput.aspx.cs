@@ -7,6 +7,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data.SqlClient;
 using System.Collections;
+using System.Globalization;
 
 
 namespace PatientCount
@@ -60,13 +61,21 @@ namespace PatientCount
                 // Load countries in countries dropdown
                 LoadCountries(dbConnection);
                 // Populate period table with data
-                for (int i = 0; i >= -12; i--)
-                {
-                    string period = DateTime.Now.AddMonths(i).ToString("MMM-yyyy");
-                   // string periodData = DateTime.Now.AddMonths(i).ToString("MMyyyy");
-                    string periodData = DateTime.Now.AddMonths(i).ToString("yyyyMM");
+
+                DateTime dateOffset = new DateTime(2009, 12, 1);
+                DateTime dateNow = DateTime.Now;
+
+               // for (int i = 0; i >= -((12*7)+3); i--)
+               for (int i = 0; dateNow.AddMonths(i) >= dateOffset; i--)
+               {
+                   // string period = DateTime.Now.AddMonths(i).ToString("MMM-yyyy");
+                   // string periodData = DateTime.Now.AddMonths(i).ToString("yyyyMM");
+
+                    string period = dateNow.AddMonths(i).ToString("MMM-yyyy", CultureInfo.InvariantCulture);
+                    string periodData = dateNow.AddMonths(i).ToString("yyyyMM");
+
                     periodsDdl.Items.Add(new ListItem(period, periodData));
-                }                              
+                }                          
 
             }
 
@@ -423,213 +432,225 @@ namespace PatientCount
 
         protected void selectBtn_Click(object sender, EventArgs e)
         {
-            //Update input label
-            inputLabel.Text = "Monthly Input for " + countriesDdl.SelectedItem.Text + " " + periodsDdl.SelectedItem.Text;
-            formArea.Visible = true;
 
-            // Reset form and remove all columns except the first 3
-            if (MontlyInputGrid.Rows.Count > 0)
+            if (countriesDdl.SelectedValue == "NA")
             {
-                // Reset            
-                MontlyInputGrid.DataSource = null;
-                MontlyInputGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = MontlyInputGrid.Columns.Count - 1; i >= colOffset; i--)
-                {
-                    MontlyInputGrid.Columns.RemoveAt(i);
-                }
-            }
+                inputLabel.Text = "You must select a country in the countries dropdown";
+                formArea.Visible = false;
 
-            // We might need to store values in viewstate
-            ViewState.Add("period", periodsDdl.SelectedValue);
-            ViewState.Add("country", int.Parse(countriesDdl.SelectedValue));
-
-            // Load Comments
-
-            string sql = string.Format("SELECT Comment FROM[PCM].[dbo].[Comments] WHERE [CountryId] = '{0}' and [Period] = '{1}'", countriesDdl.SelectedValue, periodsDdl.SelectedValue);
-            string comments = string.Empty;
-
-            using (SqlConnection con = new SqlConnection(dbConnection))
-            {
-                SqlCommand cmd = new SqlCommand(sql, con);
-                con.Open();
-                comments = (string)cmd.ExecuteScalar();
-                con.Close();
-            }
-
-            if(!string.IsNullOrEmpty(comments))
-            {
-                txtComments.Text = comments;
             }
             else
             {
-                txtComments.Text = string.Empty;
-            }
-
-
-            //Clear cached columnrow
-            Cache.Remove("cols");
-            populateForm(countriesDdl.SelectedValue, periodsDdl.SelectedValue);
-
-            DataTable dataSet = new DataTable();
-            string sqlquery = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "2"); 
-
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlquery, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSet);
-            }
-
-            // Reset form and remove all columns except the first 3
-            if (AHGrid.Rows.Count > 0)
-            {
-                // Reset            
-                AHGrid.DataSource = null;
-                AHGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = AHGrid.Columns.Count - 1; i >= 1; i--)
+                // Reset form and remove all columns except the first 3
+                if (MontlyInputGrid.Rows.Count > 0)
                 {
-                    AHGrid.Columns.RemoveAt(i);
+                    // Reset            
+                    MontlyInputGrid.DataSource = null;
+                    MontlyInputGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = MontlyInputGrid.Columns.Count - 1; i >= colOffset; i--)
+                    {
+                        MontlyInputGrid.Columns.RemoveAt(i);
+                    }
                 }
-            }
 
-            Cache.Remove("Acquired Haemophilia");
-            createForm("Acquired Haemophilia", "Acquired Haemophilia", AHGrid, dataSet, true,false, string.Empty, false);
+                //Update input label
+                inputLabel.Text = "Monthly Input for " + countriesDdl.SelectedItem.Text + " " + periodsDdl.SelectedItem.Text;
 
-            // BInd Data for Surgery CH
-            DataTable dataSetSurgery = new DataTable();
-            string sqlquerySurgery = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "4");
-            
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlquerySurgery, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSetSurgery);
-            }
+                formArea.Visible = true;
+                // must make sure something is selected
 
-            // Reset form and remove all columns except the first 3
-            if (SurgeryGrid.Rows.Count > 0)
-            {
-                // Reset            
-                SurgeryGrid.DataSource = null;
-                SurgeryGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = SurgeryGrid.Columns.Count - 1; i >= 1; i--)
+                // We might need to store values in viewstate
+                ViewState.Add("period", periodsDdl.SelectedValue);
+                ViewState.Add("country", int.Parse(countriesDdl.SelectedValue));
+
+                // Load Comments
+
+                string sql = string.Format("SELECT Comment FROM[PCM].[dbo].[Comments] WHERE [CountryId] = '{0}' and [Period] = '{1}'", countriesDdl.SelectedValue, periodsDdl.SelectedValue);
+                string comments = string.Empty;
+
+                using (SqlConnection con = new SqlConnection(dbConnection))
                 {
-                    SurgeryGrid.Columns.RemoveAt(i);
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    con.Open();
+                    comments = (string)cmd.ExecuteScalar();
+                    con.Close();
                 }
-            }
 
-            Cache.Remove("Surgery CH");
-            createForm("Surgery", "Surgery CH", SurgeryGrid, dataSetSurgery, true, true, "Total Surgeries", false);
-
-            // bind data for factor 7
-            DataTable dataSetFactor = new DataTable();
-            string sqlqueryFactor = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "5");
-
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryFactor, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSetFactor);
-            }
-
-            // Reset form and remove all columns except the first 3
-            if (FactorGrid.Rows.Count > 0)
-            {
-                // Reset            
-                FactorGrid.DataSource = null;
-                FactorGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = FactorGrid.Columns.Count - 1; i >= 1; i--)
+                if (!string.IsNullOrEmpty(comments))
                 {
-                    FactorGrid.Columns.RemoveAt(i);
+                    txtComments.Text = comments;
                 }
-            }
-
-            Cache.Remove("Factor VII Deficiency");
-            createForm("Factor VII Deficiency", "Factor VII Deficiency", FactorGrid, dataSetFactor, false, false, string.Empty, false);
-
-
-            // bind data for factor 7
-            DataTable dataSetThrombosis = new DataTable();
-            string sqlqueryThrombosis = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "6");
-
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryThrombosis, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSetThrombosis);
-            }
-
-            // Reset form and remove all columns except the first 3
-            if (thrombosisGrid.Rows.Count > 0)
-            {
-                // Reset            
-                thrombosisGrid.DataSource = null;
-                thrombosisGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = thrombosisGrid.Columns.Count - 1; i >= 1; i--)
+                else
                 {
-                    thrombosisGrid.Columns.RemoveAt(i);
+                    txtComments.Text = string.Empty;
                 }
-            }
 
-            Cache.Remove("Glanzmann's thrombasthenia");
-            createForm("Glanzmann's Thrombasthenia", "Glanzmann's thrombasthenia", thrombosisGrid, dataSetThrombosis, false, false, string.Empty, false);
-        
-            // bind data for Age Split
-            DataTable dataSetAgeSplit = new DataTable();
-            string sqlqueryAgeSplit = string.Format(Queries.getFormDataCategory, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "7");
 
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryAgeSplit, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSetAgeSplit);
-            }
+                //Clear cached columnrow
+                Cache.Remove("cols");
+                populateForm(countriesDdl.SelectedValue, periodsDdl.SelectedValue);
 
-            // Reset form and remove all columns except the first 3
-            if (AgeSplitGrid.Rows.Count > 0)
-            {
-                // Reset            
-                AgeSplitGrid.DataSource = null;
-                AgeSplitGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = AgeSplitGrid.Columns.Count - 1; i >= 1; i--)
+                DataTable dataSet = new DataTable();
+                string sqlquery = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "2", periodsDdl.SelectedValue.Substring(0, 4));
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlquery, dbConnection))
                 {
-                    AgeSplitGrid.Columns.RemoveAt(i);
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSet);
                 }
-            }
 
-
-
-            Cache.Remove("CH Age split");
-            createForm("Age split", "CH Age split", AgeSplitGrid, dataSetAgeSplit, false, true, "Total Patients", true);
-
-
-            // bind data for patients Form
-            DataTable dataSetPatients = new DataTable();
-            string sqlqueryPatients = string.Format(Queries.getPatientsFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "8");
-
-            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryPatients, dbConnection))
-            {
-                // fill the DataSet using our DataAdapter 
-                dataAdapter.Fill(dataSetPatients);
-            }
-
-            // Reset form and remove all columns except the first 3
-            if (PatientsGrid.Rows.Count > 0)
-            {
-                // Reset            
-                PatientsGrid.DataSource = null;
-                PatientsGrid.DataBind();
-                // Clear All columns except the manually bound columns
-                for (int i = PatientsGrid.Columns.Count - 1; i >= 1; i--)
+                // Reset form and remove all columns except the first 3
+                if (AHGrid.Rows.Count > 0)
                 {
-                    PatientsGrid.Columns.RemoveAt(i);
+                    // Reset            
+                    AHGrid.DataSource = null;
+                    AHGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = AHGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        AHGrid.Columns.RemoveAt(i);
+                    }
                 }
+
+                Cache.Remove("Acquired Haemophilia");
+                createForm("Acquired Haemophilia", "Acquired Haemophilia", AHGrid, dataSet, true, false, string.Empty, false);
+
+                // BInd Data for Surgery CH
+                DataTable dataSetSurgery = new DataTable();
+                // string sqlquerySurgery = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "4");
+                string sqlquerySurgery = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "4", periodsDdl.SelectedValue.Substring(0, 4));
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlquerySurgery, dbConnection))
+                {
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSetSurgery);
+                }
+
+                // Reset form and remove all columns except the first 3
+                if (SurgeryGrid.Rows.Count > 0)
+                {
+                    // Reset            
+                    SurgeryGrid.DataSource = null;
+                    SurgeryGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = SurgeryGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        SurgeryGrid.Columns.RemoveAt(i);
+                    }
+                }
+
+                Cache.Remove("Surgery CH");
+                createForm("Surgery", "Surgery CH", SurgeryGrid, dataSetSurgery, true, true, "Total Surgeries", false);
+
+                // bind data for factor 7
+                DataTable dataSetFactor = new DataTable();
+                string sqlqueryFactor = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "5", periodsDdl.SelectedValue.Substring(0, 4));
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryFactor, dbConnection))
+                {
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSetFactor);
+                }
+
+                // Reset form and remove all columns except the first 3
+                if (FactorGrid.Rows.Count > 0)
+                {
+                    // Reset            
+                    FactorGrid.DataSource = null;
+                    FactorGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = FactorGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        FactorGrid.Columns.RemoveAt(i);
+                    }
+                }
+
+                Cache.Remove("Factor VII Deficiency");
+                createForm("Factor VII Deficiency", "Factor VII Deficiency", FactorGrid, dataSetFactor, false, false, string.Empty, false);
+
+
+                // bind data for factor 7
+                DataTable dataSetThrombosis = new DataTable();
+                string sqlqueryThrombosis = string.Format(Queries.getFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "6", periodsDdl.SelectedValue.Substring(0, 4));
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryThrombosis, dbConnection))
+                {
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSetThrombosis);
+                }
+
+                // Reset form and remove all columns except the first 3
+                if (thrombosisGrid.Rows.Count > 0)
+                {
+                    // Reset            
+                    thrombosisGrid.DataSource = null;
+                    thrombosisGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = thrombosisGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        thrombosisGrid.Columns.RemoveAt(i);
+                    }
+                }
+
+                Cache.Remove("Glanzmann's thrombasthenia");
+                createForm("Glanzmann's Thrombasthenia", "Glanzmann's thrombasthenia", thrombosisGrid, dataSetThrombosis, false, false, string.Empty, false);
+
+                // bind data for Age Split
+                DataTable dataSetAgeSplit = new DataTable();
+                string sqlqueryAgeSplit = string.Format(Queries.getFormDataCategory, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "7");
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryAgeSplit, dbConnection))
+                {
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSetAgeSplit);
+                }
+
+                // Reset form and remove all columns except the first 3
+                if (AgeSplitGrid.Rows.Count > 0)
+                {
+                    // Reset            
+                    AgeSplitGrid.DataSource = null;
+                    AgeSplitGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = AgeSplitGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        AgeSplitGrid.Columns.RemoveAt(i);
+                    }
+                }
+
+
+
+                Cache.Remove("CH Age split");
+                createForm("Age split", "CH Age split", AgeSplitGrid, dataSetAgeSplit, false, true, "Total Patients", true);
+
+
+                // bind data for patients Form
+                DataTable dataSetPatients = new DataTable();
+                string sqlqueryPatients = string.Format(Queries.getPatientsFormData, countriesDdl.SelectedValue, periodsDdl.SelectedValue, "8");
+
+                using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryPatients, dbConnection))
+                {
+                    // fill the DataSet using our DataAdapter 
+                    dataAdapter.Fill(dataSetPatients);
+                }
+
+                // Reset form and remove all columns except the first 3
+                if (PatientsGrid.Rows.Count > 0)
+                {
+                    // Reset            
+                    PatientsGrid.DataSource = null;
+                    PatientsGrid.DataBind();
+                    // Clear All columns except the manually bound columns
+                    for (int i = PatientsGrid.Columns.Count - 1; i >= 1; i--)
+                    {
+                        PatientsGrid.Columns.RemoveAt(i);
+                    }
+                }
+
+                Cache.Remove("Patients");
+                createPatientsForm("ITI and clinical trial","Patients", PatientsGrid, dataSetPatients);
             }
-
-            Cache.Remove("Patients");
-            createPatientsForm("Patients", PatientsGrid, dataSetPatients);
-
 
         }
 
@@ -637,22 +658,8 @@ namespace PatientCount
         {
             // create the DataSet will be used for reference
             DataTable dataSet = new DataTable();
-
-            // Query to fetct products to be displayed in the form. 
-            // Must be updated to handle form sepcific things and perhaps enabled products
-           /* string sqlquery = string.Format(@"SELECT  Products.[id]
-                                      ,[Product]
-                                      ,[Active]
-                                      ,[ProductGroup]
-                                      ,[ProductType]
-                                      ,ProductGroups.[id] as ProductGroupId
-                                  FROM [PCM].[dbo].[Products] 
-                                  left join [PCM].[dbo].[ExcludeProductCountry]  
-                                  on [PCM].[dbo].[Products].id = [ExcludeProductCountry].ProductId and [ExcludeProductCountry].CountryId = {0}
-                                  left join [PCM].[dbo].ProductGroups
-                                    on [PCM].[dbo].[Products].ProductGroupId = [ProductGroups].id
-                                  Where [ExcludeProductCountry].ProductId IS NULL and [PCM].[dbo].[Products].Active = 1 Order by ProductType, id", selectedCountry);*/
-
+            DataTable dataSetAllProducts = new DataTable();
+            
             string sqlquery = string.Format(@"select t1.id, t1.Product, t1.Active, t1.ProductGroup, t1.ProductType, t1.ProductGroupId from
 
                             (SELECT  Products.[id]
@@ -661,6 +668,7 @@ namespace PatientCount
                                       ,[ProductGroup]
                                       ,[ProductType]
                                       ,ProductGroups.[id] as ProductGroupId
+                                      ,ProductGroups.ProductGroupOrder
                                   FROM [PCM].[dbo].[Products]                                  
                                   left join [PCM].[dbo].ProductGroups
                                     on [PCM].[dbo].[Products].ProductGroupId = [ProductGroups].id
@@ -675,14 +683,23 @@ namespace PatientCount
 
 									  on t1.id = t2.ProductId
 
-									  order by t1.ProductType, t1.id", selectedCountry);
+									  order by t1.ProductType, t1.ProductGroupOrder, t1.ProductGroupId, t1.id", selectedCountry);
 
+
+            string sqlqueryAllProducts = "SELECT [id] FROM[PCM].[dbo].[Products]";
 
             using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlquery, dbConnection))
             {
                 // fill the DataSet using our DataAdapter 
                 dataAdapter.Fill(dataSet);
             }
+
+            using (SqlDataAdapter dataAdapter = new SqlDataAdapter(sqlqueryAllProducts, dbConnection))
+            {
+                // fill the DataSet using our DataAdapter 
+                dataAdapter.Fill(dataSetAllProducts);
+            }
+
 
             // Create Active and selected products query selector
             string inSQLCLause = "(";
@@ -691,6 +708,14 @@ namespace PatientCount
                 inSQLCLause += "'" + dataSet.Rows[i]["id"].ToString() + "',";
             }
             inSQLCLause += "'1000','1002','lost','losttole','losttrial')";
+
+            string inSQLCLauseAllProducts = "(";
+            for (int i = 0; i < dataSetAllProducts.Rows.Count; i++)
+            {
+                inSQLCLauseAllProducts += "'" + dataSetAllProducts.Rows[i]["id"].ToString() + "',";
+            }
+            inSQLCLauseAllProducts += "'1000','1002','lost','losttole','losttrial')";
+
 
             // Contains all active and selected products
             DataTable dtFiltered = dataSet.Copy();
@@ -805,15 +830,7 @@ namespace PatientCount
                     tfObject.ItemTemplate = new CreateItemTemplate(ListItemType.Item, dataSet.Rows[i]["id"].ToString(), 3, 4 + numberOfProduct);
 
                     MontlyInputGrid.Columns.Add(tfObject);
-
-                    /* BoundField bfield = new BoundField();
-                     bfield.HeaderText = i.ToString();
-                     bfield.DataField = dataSet.Rows[i]["id"].ToString();
-                     bfield.ReadOnly = false;
-                     bfield.ControlStyle.Width = 10;
-                     //bfield.ReadOnly = false;                       
-                     MontlyInputGrid.Columns.Add(bfield);*/
-
+                                     
                     // Add datacolumn to 
                     DataColumn dc = dtHorizontal.Columns[i];
                     dtFiltered.Columns.Add(dataSet.Rows[i]["id"].ToString(), dc.DataType);
@@ -853,13 +870,8 @@ namespace PatientCount
                 tfObject.HeaderTemplate = new CreateItemTemplate(ListItemType.Header, productArray[i, 1], 3, 4 + numberOfProduct);
                 tfObject.ItemTemplate = new CreateItemTemplate(ListItemType.Item, productArray[i, 1], 3, 4 + numberOfProduct);
                 MontlyInputGrid.Columns.Add(tfObject);
+               
 
-                // Must be changed to template field
-                /* BoundField productfield = new BoundField();
-                 productfield.HeaderText = productArray[i, 0];
-                 productfield.DataField = productArray[i, 1];
-                 productfield.ReadOnly = false;
-                 MontlyInputGrid.Columns.Add(productfield);*/
 
                 dtFiltered.Rows[0][productArray[i, 1]] = "Switch To";
                 dtFiltered.Rows[1][productArray[i, 1]] = productArray[i, 0];
@@ -872,17 +884,33 @@ namespace PatientCount
             dtFiltered.Columns.Add("end", typeof(String));
 
             // Add Columns for End treatment
-            BoundField netflowfield = new BoundField();
-            netflowfield.HeaderText = "netflow";
-            netflowfield.DataField = "netflow";           
-            netflowfield.ReadOnly = true;
-            MontlyInputGrid.Columns.Add(netflowfield);
+          /*  BoundField netflowfield = new BoundField();
+              netflowfield.HeaderText = "netflow";
+              netflowfield.DataField = "netflow";            
+              netflowfield.ReadOnly = true;
+              MontlyInputGrid.Columns.Add(netflowfield);
 
             BoundField endfield = new BoundField();
             endfield.HeaderText = "end";
             endfield.DataField = "end";
             endfield.ReadOnly = true;
-            MontlyInputGrid.Columns.Add(endfield);
+            MontlyInputGrid.Columns.Add(endfield);*/
+
+            TemplateField netf = new TemplateField();
+            netf.HeaderText = "netflow";
+            netf.HeaderStyle.Width = Unit.Percentage(30);                       
+            netf.HeaderTemplate = new CreateItemTemplate(ListItemType.Header, "netflow", 3,99);
+            netf.ItemTemplate = new CreateItemTemplate(ListItemType.Item, "netflow", 3,99);
+            MontlyInputGrid.Columns.Add(netf);
+
+            TemplateField end = new TemplateField();
+            end.HeaderText = "end";
+            end.HeaderStyle.Width = Unit.Percentage(30);
+            end.HeaderTemplate = new CreateItemTemplate(ListItemType.Header, "end", 3,99);
+            end.ItemTemplate = new CreateItemTemplate(ListItemType.Item, "end", 3,99);
+            MontlyInputGrid.Columns.Add(end);
+
+
 
             dtFiltered.Rows[0]["netflow"] = "End treatment";
             dtFiltered.Rows[0]["end"] = "End treatment";
@@ -926,13 +954,14 @@ namespace PatientCount
             }
 
             // Bind start Values. Only include active and selected products. This query returns all products with data
-            string sqlQueryStartValues = string.Format(@"Select  (case when t1.Product is null then t2.Product else t1.Product END) as Product, t1.XValue, t2.YValue, t2.[ProductGroupId]
+            // Must check that values products are valid both from and x and y perspective
+            string sqlQueryStartValues = string.Format(@"Select  (case when t1.Product is null then t2.Product else t1.Product END) as Product, isnull(t1.XValue,0) as XValue, isnull(t2.YValue,0) as YValue, t2.[ProductGroupId]
                                                                         from
 	                                                                        (SELECT      
                                                                                [X] as Product     
                                                                               ,Sum([Value]) as XValue
                                                                           FROM [PCM].[dbo].[FormData]
-                                                                          Where Period < {0} and FormId =1 and CountryId = {1} and [X] in {2}
+                                                                          Where Period < {0} and FormId =1 and CountryId = {1} and [X] in {2} and [Y] in {3}
                                                                           Group by [X]) t1
 
                                                                            FULL OUTER JOIN
@@ -944,18 +973,19 @@ namespace PatientCount
                                                                           FROM [PCM].[dbo].[FormData]
                                                                           Left Join [PCM].[dbo].[Products]
                                                                           on [Y] = [PCM].[dbo].[Products].[id]
-                                                                          Where Period < {0} and FormId =1 and CountryId = {1} and [Y] in {2}
+                                                                          Where Period < {0} and FormId =1 and CountryId = {1} and [Y] in {2} and [X] in {3}
                                                                           Group by [Y],[ProductGroupId]) t2
                                                                           on
-                                                                          t1.Product = t2.Product", selectedPeriod, selectedCountry, inSQLCLause);
+                                                                          t1.Product = t2.Product order by t2.ProductGroupId, t1.Product,t2.Product", selectedPeriod, selectedCountry, inSQLCLause, inSQLCLauseAllProducts);
 
-            string sqlQueryNetFlowValues = string.Format(@"Select  (case when t1.Product is null then t2.Product else t1.Product END) as Product, t1.XValue, t2.YValue, t2.[ProductGroupId]
+            // Must check that values products are valid both from and x and y perspective
+            string sqlQueryNetFlowValues = string.Format(@"Select  (case when t1.Product is null then t2.Product else t1.Product END) as Product,  isnull(t1.XValue,0) as XValue, isnull(t2.YValue,0) as YValue, t2.[ProductGroupId]
                                                                         from
 	                                                                        (SELECT      
                                                                                [X] as Product     
                                                                               ,Sum([Value]) as XValue
                                                                           FROM [PCM].[dbo].[FormData]
-                                                                          Where Period = {0} and FormId =1 and CountryId = {1} and [X] in {2}
+                                                                          Where Period = {0} and FormId =1 and CountryId = {1} and [X] in {2} and [Y] in {3}
                                                                           Group by [X]) t1
 
                                                                            FULL OUTER JOIN
@@ -967,10 +997,10 @@ namespace PatientCount
                                                                           FROM [PCM].[dbo].[FormData]
                                                                           Left Join [PCM].[dbo].[Products]
                                                                           on [Y] = [PCM].[dbo].[Products].[id]
-                                                                          Where Period = {0} and FormId =1 and CountryId = {1} and [Y] in {2}
+                                                                          Where Period = {0} and FormId =1 and CountryId = {1} and [Y] in {2} and [X] in {3}
                                                                           Group by [Y],[ProductGroupId]) t2
                                                                           on
-                                                                          t1.Product = t2.Product", selectedPeriod, selectedCountry, inSQLCLause);
+                                                                          t1.Product = t2.Product order by t2.ProductGroupId, t1.Product,t2.Product", selectedPeriod, selectedCountry, inSQLCLause, inSQLCLauseAllProducts);
 
             DataTable dataStartValues = new DataTable();
             DataTable dataNetFlowValues = new DataTable();
@@ -1033,7 +1063,19 @@ namespace PatientCount
 
                             if (periodContaisData)
                             {
-                                netflowValue = int.Parse(dataNetFlowValues.Rows[i]["XValue"].ToString()) - int.Parse(dataNetFlowValues.Rows[i]["YValue"].ToString());
+                                string searchStringNetFlow = "Product ='" + dataStartValues.Rows[i]["Product"].ToString() + "'";
+                                DataRow[] foundNetRows = dataNetFlowValues.Select(searchStringNetFlow);
+                                if (foundNetRows.Count() == 1)
+                                {
+                                    int rowindex = dataNetFlowValues.Rows.IndexOf(foundNetRows[0]);
+                                    netflowValue = int.Parse(dataNetFlowValues.Rows[rowindex]["XValue"].ToString()) - int.Parse(dataNetFlowValues.Rows[rowindex]["YValue"].ToString());
+                                }
+
+                                    // The error appears here. Data has been added for this month previously on old and fewer products and now it is decided to go back in time and change values based on
+                                    // new settings. The result is that the returned products and index does not match.
+                                    // 1. consider lookup and find product and associated row
+                                    // 2. Alternatively ensure that the sql returns a row per product in the in statement  
+                                  //  netflowValue = int.Parse(dataNetFlowValues.Rows[i]["XValue"].ToString()) - int.Parse(dataNetFlowValues.Rows[i]["YValue"].ToString());
                             }
 
                             dtFiltered.Rows[row]["netflow"] = netflowValue;
@@ -1075,19 +1117,85 @@ namespace PatientCount
                     }
                 }
             }
+            // What happend when start values are zero. We should still calculate end values
             else
             {
-                for (int i = rowOffset; i < dtFiltered.Rows.Count; i++)
+
+               for (int i = 0; i < dataNetFlowValues.Rows.Count; i++)
                 {
-                    dtFiltered.Rows[i]["netflow"] = 0;
-
-                    if (dtFiltered.Rows[i]["Product"].ToString() != "PUP" && dtFiltered.Rows[i]["Product"].ToString() != "Previously tolerized")
+                    if (!DBNull.Value.Equals(dataNetFlowValues.Rows[i]["ProductGroupId"]))
                     {
-                        dtFiltered.Rows[i]["Value"] = 0;
-                        dtFiltered.Rows[i]["end"] = 0;
-                    }
+                        // Get value to insert
 
+                        string searchStringNetFlow = "id ='" + dataNetFlowValues.Rows[i]["Product"].ToString() + "'";
+                        DataRow[] foundRows = dtFiltered.Select(searchStringNetFlow);
+                        if (foundRows.Count() == 1)
+                        {
+                            int row = dtFiltered.Rows.IndexOf(foundRows[0]);
+                            int startValue = 0;
+                            dtFiltered.Rows[row]["Value"] = startValue;
+
+                            int netflowValue = 0;
+
+                            if (periodContaisData)
+                            {                              
+                                  netflowValue = int.Parse(dataNetFlowValues.Rows[i]["XValue"].ToString()) - int.Parse(dataNetFlowValues.Rows[i]["YValue"].ToString());
+                               
+                             }
+
+                            dtFiltered.Rows[row]["netflow"] = netflowValue;
+                            dtFiltered.Rows[row]["end"] = startValue + netflowValue;
+                            string group = dataNetFlowValues.Rows[i]["ProductGroupId"].ToString();
+
+                            if (dicSum.ContainsKey(group))
+                            {
+                                dicSum[group] += startValue;
+                                dicSumNet[group] += netflowValue;
+
+                            }
+                            else
+                            {
+                                dicSum.Add(group, startValue);
+                                dicSumNet.Add(group, netflowValue);
+                            }
+                        }
+                    }
+                    else if (int.TryParse(dataNetFlowValues.Rows[i]["Product"].ToString(), out value))
+                    {
+                        if (value >= 1000)
+                        {
+                            string searchString = "id =" + value.ToString();
+                            DataRow[] foundRows = dtFiltered.Select(searchString);
+                            if (foundRows.Count() == 1)
+                            {
+                                int row = dtFiltered.Rows.IndexOf(foundRows[0]);
+                                if (periodContaisData)
+                                {
+                                    dtFiltered.Rows[row]["netflow"] = int.Parse(dataNetFlowValues.Rows[i]["YValue"].ToString());
+                                }
+                                else
+                                {
+                                    dtFiltered.Rows[row]["netflow"] = 0;
+                                }
+                            }
+                        }
+                    }
                 }
+
+
+
+
+                /*   for (int i = rowOffset; i < dtFiltered.Rows.Count; i++)
+                   {
+                       dtFiltered.Rows[i]["netflow"] = 0;
+
+                       if (dtFiltered.Rows[i]["Product"].ToString() != "PUP" && dtFiltered.Rows[i]["Product"].ToString() != "Previously tolerized")
+                       {
+                           dtFiltered.Rows[i]["Value"] = 0;
+                           dtFiltered.Rows[i]["end"] = 0;
+                       }
+
+                   }*/
 
             }
 
@@ -1136,7 +1244,7 @@ namespace PatientCount
             Cache.Insert("cols", columns);
         }
 
-        private void createPatientsForm(string formName, GridView grid, DataTable dt)
+        private void createPatientsForm(string formName, string cacheName, GridView grid, DataTable dt)
         {
             // Create Template Column
             TemplateField tfObject = new TemplateField();
@@ -1154,7 +1262,7 @@ namespace PatientCount
             grid.DataBind();
 
             DataControlFieldCollection columns = grid.Columns;
-            Cache.Insert(formName, columns);
+            Cache.Insert(cacheName, columns);
 
         }
 
@@ -1279,8 +1387,34 @@ namespace PatientCount
                         }
                         else
                         {
-                            titleRow[addedId[i].ToString()] = "Period";
-                            if (includeYTD)
+                    
+                        string reportingInterval = string.Empty;
+                        string period = string.Empty;
+
+                    if (ViewState["period"] != null)
+                        {
+                            period = (string)ViewState["period"];
+                            
+                        }
+
+                    if (ViewState["reportinginterval"] != null)
+                        {
+                            if((string)ViewState["reportinginterval"] == "Quarterly")
+                            {
+                                int quarter = int.Parse(period.Substring(4, 2)) / 3;
+                                reportingInterval = quarter + "Q-" + period.Substring(0, 4);
+                            }
+                            else
+                            { 
+                                
+                                reportingInterval = DateTime.ParseExact(period, "yyyyMM", null).ToString("MMM-yyyy", CultureInfo.InvariantCulture); 
+                             }
+
+                        }
+
+                        titleRow[addedId[i].ToString()] = reportingInterval;
+
+                    if (includeYTD)
                             {
                                 titleRow["ytd-" + addedId[i].ToString()] = "YTD";
                             }
@@ -1351,42 +1485,41 @@ namespace PatientCount
             {
                 DataControlFieldCollection columns = (DataControlFieldCollection)Cache["cols"];
 
-              /*  int colCount = MontlyInputGrid.Columns.Count;
-                for(int i = colCount-3; i >= 0; i--)
-                {
-                    MontlyInputGrid.Columns.RemoveAt(i);
-                }*/
-
-                MontlyInputGrid.Columns.Clear(); // gvSchluessel is the GridView
+                int colCount = MontlyInputGrid.Columns.Count;
+                /* for(int i = colCount-3; i >= 0; i--)
+                 {
+                     MontlyInputGrid.Columns.RemoveAt(i);
+                 }*/
+                                 
+                MontlyInputGrid.Columns.Clear(); 
 
                 foreach (DataControlField field in columns)
                 {
-                    
                         MontlyInputGrid.Columns.Add(field);
-                        if (field.GetType() == typeof(TemplateField))
+                    if (field.GetType() == typeof(TemplateField))
+                    {
+                        TemplateField tf = (TemplateField)field;
+                        int i = MontlyInputGrid.Columns.IndexOf(tf);
+                        if (tf.HeaderTemplate != null)
                         {
-                            TemplateField tf = (TemplateField)field;
-                            int i = MontlyInputGrid.Columns.IndexOf(tf);
-                            if (tf.HeaderTemplate != null)
+                            try
                             {
-                                try
-                                {
-                                    tf.HeaderTemplate.InstantiateIn(MontlyInputGrid.HeaderRow.Cells[i]);
-                                }
-                                catch (Exception exp) { }
+                                tf.HeaderTemplate.InstantiateIn(MontlyInputGrid.HeaderRow.Cells[i]);
                             }
-                            foreach (GridViewRow row in MontlyInputGrid.Rows)
+                            catch (Exception exp) { }
+                        }
+                        foreach (GridViewRow row in MontlyInputGrid.Rows)
+                        {
+                            if (tf.ItemTemplate != null)
                             {
-                                if (tf.ItemTemplate != null)
-                                {
-                                    tf.ItemTemplate.InstantiateIn(row.Cells[i]);
-                                }
-                            }
-                            if (tf.FooterTemplate != null)
-                            {
-                                tf.FooterTemplate.InstantiateIn(MontlyInputGrid.FooterRow.Cells[i]);
+                                tf.ItemTemplate.InstantiateIn(row.Cells[i]);
                             }
                         }
+                        if (tf.FooterTemplate != null)
+                        {
+                            tf.FooterTemplate.InstantiateIn(MontlyInputGrid.FooterRow.Cells[i]);
+                        }
+                    }      
                     
                 }
             }
@@ -1674,37 +1807,52 @@ namespace PatientCount
 
         protected void countriesDdl_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string sql = string.Format("SELECT [ReportingInterval] FROM[PCM].[dbo].[Countries] Where id = {0}", countriesDdl.SelectedValue);
-            string reportingInterval = string.Empty;
-
-            using (SqlConnection con = new SqlConnection(dbConnection))
+            if (countriesDdl.SelectedValue != "NA")
             {
-                SqlCommand cmd = new SqlCommand(sql, con);
-                con.Open();
-                reportingInterval = (string)cmd.ExecuteScalar();
-                con.Close();
-            }
+                string sql = string.Format("SELECT [ReportingInterval] FROM[PCM].[dbo].[Countries] Where id = {0}", countriesDdl.SelectedValue);
+                string reportingInterval = string.Empty;
 
-             if (reportingInterval == "Quarterly")
-            {
-                for(int i=0; i < periodsDdl.Items.Count; i++)
+                using (SqlConnection con = new SqlConnection(dbConnection))
                 {
-                    if(int.Parse(periodsDdl.Items[i].Value.Substring(4,2)) %3 != 0)
-                    {
-                        periodsDdl.Items[i].Enabled = false;
-                        //periodsDdl.Items[i].Attributes.Add("disabled", "disabled");
-                    }
-
-                }  
-            }
-            else
-            {
-                for (int i = 0; i < periodsDdl.Items.Count; i++)
-                {
-                    periodsDdl.Items[i].Enabled = true;
-                   // periodsDdl.Items[i].Attributes.Remove("disabled");
-
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    con.Open();
+                    reportingInterval = (string)cmd.ExecuteScalar();
+                    con.Close();
                 }
+
+                if (reportingInterval == "Quarterly")
+                {
+                    for (int i = 0; i < periodsDdl.Items.Count; i++)
+                    {
+                        if (int.Parse(periodsDdl.Items[i].Value.Substring(4, 2)) % 3 != 0)
+                        {
+                            periodsDdl.Items[i].Enabled = false;
+                            //periodsDdl.Items[i].Attributes.Add("disabled", "disabled");
+                        }
+                        else
+                        {
+                            // Change the format to correspont to quarter data
+                            int quarter = int.Parse(periodsDdl.Items[i].Value.Substring(4, 2)) / 3;
+                            periodsDdl.Items[i].Text = quarter + "Q-" + periodsDdl.Items[i].Value.Substring(0, 4);
+                        }
+
+
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < periodsDdl.Items.Count; i++)
+                    {
+                        periodsDdl.Items[i].Enabled = true;
+                        // Change the format to original format
+                        periodsDdl.Items[i].Text = DateTime.ParseExact(periodsDdl.Items[i].Value, "yyyyMM", null).ToString("MMM-yyyy", CultureInfo.InvariantCulture);
+                        // periodsDdl.Items[i].Attributes.Remove("disabled");
+
+                    }
+                }
+
+                // Add period selection to viewstate
+                ViewState.Add("reportinginterval", reportingInterval);
             }
         }              
 
@@ -1783,19 +1931,33 @@ namespace PatientCount
             //Code to create the ItemTemplate and its field.
             if (myListItemType == ListItemType.Item)
             {
-                // Style textbox to look like a label
-                TextBox txtProduct = new TextBox();
-                txtProduct.DataBinding += new EventHandler(tb1_DataBinding);
-                txtProduct.CssClass = "formText";
-                txtProduct.Attributes.Add("productId", _columnName);
-                txtProduct.BackColor = System.Drawing.Color.Transparent;
-                txtProduct.BorderStyle = BorderStyle.None;
-                txtProduct.BorderWidth = 0;
-                txtProduct.Width = Unit.Percentage(99); //Unit.Pixel(75);
-
+                if (_columnName != "end" && _columnName != "netflow")
+                {
+                    // Style textbox to look like a label
+                    TextBox txtProduct = new TextBox();
+                    txtProduct.DataBinding += new EventHandler(tb1_DataBinding);
+                    txtProduct.CssClass = "formText";
+                    txtProduct.Attributes.Add("productId", _columnName);
+                    txtProduct.BackColor = System.Drawing.Color.Transparent;
+                    txtProduct.BorderStyle = BorderStyle.None;
+                    txtProduct.BorderWidth = 0;
+                    txtProduct.Width = Unit.Percentage(99);
+                    container.Controls.Add(txtProduct);//Unit.Pixel(75);
+                }
+                else
+                {
+                    TextBox txtProduct = new TextBox();
+                    txtProduct.DataBinding += new EventHandler(tb1_DataBinding);
+                    txtProduct.CssClass = "sumColumnn";                  
+                    txtProduct.BackColor = System.Drawing.Color.Transparent;
+                    txtProduct.BorderStyle = BorderStyle.None;
+                    txtProduct.BorderWidth = 0;
+                    txtProduct.Width = Unit.Percentage(99);
+                    container.Controls.Add(txtProduct);//Unit.Pixel(75);
+                }
                 //txtCashCheque.Columns
                 //txtCashCheque.ReadOnly = true;
-                container.Controls.Add(txtProduct);
+               // container.Controls.Add(txtProduct);
             }
         }
         void tb1_DataBinding(object sender, EventArgs e)
@@ -1817,7 +1979,7 @@ namespace PatientCount
             {
                 txtdata.ReadOnly = false;
                 txtdata.Attributes.Add("readonly", "readonly");
-                txtdata.Attributes["productId"] += "-total";
+                txtdata.Attributes["productId"] += "-total";               
                 txtdata.TabIndex = -1;
 
             }
@@ -1826,10 +1988,27 @@ namespace PatientCount
                 txtdata.ReadOnly = false;              
                 txtdata.Attributes.Add("readonly", "readonly");
                 // Prevent tabindex
-                txtdata.TabIndex = -1;
-               
+                txtdata.TabIndex = -1;               
             }
-           
+            else if (_columnName == "end" || _columnName == "netflow")
+            {
+                txtdata.ReadOnly = false;
+                txtdata.Attributes.Add("readonly", "readonly");               
+                txtdata.TabIndex = -1;
+                if (string.IsNullOrEmpty(txtdata.Text))
+                {
+                    txtdata.Text = "0";
+                }
+            }
+
+           /* else if (_columnName.Contains("nertflow"))
+            {
+                txtdata.ReadOnly = false;
+                txtdata.Attributes.Add("readonly", "readonly");
+                // Prevent tabindex
+                txtdata.TabIndex = -1;
+            }*/
+
             if (dataValue != DBNull.Value)
             {
                 txtdata.Text = dataValue.ToString();

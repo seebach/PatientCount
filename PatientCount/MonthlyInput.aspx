@@ -25,7 +25,7 @@
 	-->
     <script>
         $(document).ready(function () {
-
+           /*
             $("#MontlyInputGrid").on('input', '.formText', function () {
 
                 //________________ X Product Calc___________________
@@ -68,11 +68,17 @@
 
                     // Update New Flow
                     var netFlow = xSum - YSum;
+
                     var currentValue = parseInt($(yRow).find('td:nth-last-child(2)').text());
+                    //var test = parseInt($(yRow).find('td:nth-last-child(2)').find("input").val());
+                    console.log(currentValue);
+
                     $(yRow).find('td:nth-last-child(2)').html(netFlow);
                     // Get Start Values
                     //console.log($(yRow).find('td.startCol').text());
                     var startValue = parseInt($(yRow).find('td.startCol').text());
+
+
                     var endValue = startValue + netFlow;
                     $(yRow).find('td:last-child').html(endValue);
 
@@ -193,7 +199,193 @@
                 totalRow.last().find('td:last-child').html(totalGroupValue);
 
             });
+*/
+            
+            $("#MontlyInputGrid").on('input', '.formText', function () {
 
+                //________________ X Product Calc___________________
+
+                // Get reference to selected x Product
+                var getXProduct = $(this).attr('productId');
+                var xSum = 0;
+                var YSum = 0;
+
+                if (!isNaN(getXProduct)) {
+
+                    //console.log(getXProduct);
+
+                    $('#MontlyInputGrid input[productId=' + getXProduct + ']').each(function (index) {
+                        //Check if number is not empty                
+                        if ($.trim($(this).val()) != "") {
+                            //Check if number is a valid integer                    
+                            if (!isNaN($(this).val())) {
+                                xSum = xSum + parseFloat($(this).val());
+                            }
+                        }
+                    });
+
+                    // Find row where xProduct is
+                    var yRow = $('#MontlyInputGrid td:first-child').filter(function () {
+                        return $(this).text() === getXProduct
+                    }).closest("tr");
+
+                    //Code to get the Sum of the row
+                    $(".formText", yRow).each(function (index) {
+                        //Check if number is not empty                
+                        if ($.trim($(this).val()) != "") {
+                            //Check if number is a valid integer                    
+                            if (!isNaN($(this).val())) {
+                                YSum = YSum + parseFloat($(this).val());
+                            }
+                        }
+                    });
+
+
+                    // Update New Flow
+                    var netFlow = xSum - YSum;
+                                        
+                    var currentValue = parseInt($(yRow).find('td:nth-last-child(2)').find("input").val());
+                    console.log(currentValue);
+
+                    $(yRow).find('td:nth-last-child(2)').find("input").val(netFlow);
+                    // Get Start Values
+                    //console.log($(yRow).find('td.startCol').text());
+                    var startValue = parseInt($(yRow).find('td.startCol').text());
+                    var endValue = startValue + netFlow;
+
+                    if (!isNaN(endValue))
+                    {                                              
+                        $(yRow).find('td:last-child').find("input").val(endValue);
+                    }
+                    
+
+                    // Update ProductGroup. Find associated productgroup, find all rows where product group match and use last index to get the actual sum row.
+                    // Use the netflow value together with existing netflow value for product and existing product group value to calculate new product group value
+
+                    // Get reference to associated productGroup
+                    var xGroup = $(yRow).find('td:nth-child(2)').text();                    
+                    // Find the rows matching the productgroupid
+                    var xGroupRow = $('#MontlyInputGrid td:nth-child(2).productGroup').filter(function () {
+                        return $(this).text() === xGroup
+                    }).closest("tr");
+
+                    // Get the current value of the associated group
+                    var currentGroupValue = parseInt($(xGroupRow).last().find('td:nth-last-child(2)').find("input").val());
+                    var groupValue = currentGroupValue + (netFlow - currentValue);
+                 
+                    // Update netflow
+                    if (!isNaN(groupValue)) {
+                        $(xGroupRow).last().find('td:nth-last-child(2)').find("input").val(groupValue);
+                    }
+
+                    // Update End
+                    if (!isNaN(currentValue)) {
+                        $(xGroupRow).last().find('td:last-child').find("input").val((netFlow - currentValue) + parseInt($(xGroupRow).last().find('td:last-child').find("input").val()));
+                    }
+                }
+
+                // Might be issues updating when x and y are the same product group. 
+
+                //________________ Y Product Calc___________________
+
+                var thisRow = $(this).closest("tr");
+                var yProduct = $(thisRow).find('td:first-child').text();
+
+                var yProductXSum = 0;
+                var yProductYSum = 0;
+
+                //Get Initial y-group values
+                var YcurrentValueNetFlow = parseInt($(thisRow).find('td:nth-last-child(2)').find("input").val());
+
+                $(".formText", thisRow).each(function (index) {
+                    //Check if number is not empty                
+                    if ($.trim($(this).val()) != "") {
+                        //Check if number is a valid integer                    
+                        if (!isNaN($(this).val())) {
+                            yProductYSum = yProductYSum + parseFloat($(this).val());
+                        }
+                    }
+                });
+
+
+
+                $('#MontlyInputGrid input[productId=' + yProduct + ']').each(function (index) {
+                    //Check if number is not empty                
+                    if ($.trim($(this).val()) != "") {
+                        //Check if number is a valid integer                    
+                        if (!isNaN($(this).val())) {
+                            yProductXSum = yProductXSum + parseFloat($(this).val());
+                        }
+                    }
+                });
+
+                var YnetFlow;
+                if (yProduct < 1000)
+                { YnetFlow = yProductXSum - yProductYSum; }
+                else
+                { YnetFlow = Math.abs(yProductXSum - yProductYSum); }
+
+                $(thisRow).find('td:nth-last-child(2)').find("input").val(YnetFlow);
+                // Get Start Values               
+                var YstartValue = parseInt($(thisRow).find('td.startCol').text());
+                var YendValue = YstartValue + YnetFlow;
+
+                //   $(thisRow).find('td:last-child').html(YendValue);
+
+                // Update Product Group
+                // Update ProductGroup. Find associated productgroup, find all rows where product group match and use last index to get the actual sum row.
+                // Use the netflow value together with existing netflow value for product and existing product group value to calculate new product group value
+
+                // Get reference to associated productGroup
+                var yGroup = $(thisRow).find('td:nth-child(2)').text().trim();
+                var YgroupValue = 0;
+
+                // Do not update grouprow if yGroup is null or empty referring to 1000
+                if (typeof (yGroup) !== "undefined" && yGroup) {
+                    // Find the rows matching the productgroupid
+                    var yGroupRow = $('#MontlyInputGrid td:nth-child(2).productGroup').filter(function () {
+                        return $(this).text() === yGroup
+                    }).closest("tr");
+
+                    // Get the current value of the associated group
+                    var YcurrentGroupValue = parseInt($(yGroupRow).last().find('td:nth-last-child(2)').find("input").val());
+                    // Neets                                                     
+                    YgroupValue = (YnetFlow - YcurrentValueNetFlow) + YcurrentGroupValue;
+                    $(yGroupRow).last().find('td:nth-last-child(2)').find("input").val(YgroupValue);                   
+                    $(yGroupRow).last().find('td:last-child').find("input").val((YnetFlow - YcurrentValueNetFlow) + parseInt($(yGroupRow).last().find('td:last-child').find("input").val()));
+                    
+                }
+
+              
+                if (!isNaN(YendValue))
+                {
+                     $(thisRow).find('td:last-child').find("input").val(YendValue);
+                }
+                // Update totals col by getting the total's col index 
+
+                var totalGroupValue = 0;
+                var totalNetFlowValue = 0;
+
+                var totalRow = $('#MontlyInputGrid td:nth-child(2).productGroup').filter(function () {
+                    return $(this).text() === '0'
+                }).closest("tr");
+
+                var nextGroupRows = totalRow.nextAll();
+                nextGroupRows.each(function (index) {
+
+                    var myvalFlow = parseInt($(this).find('td:nth-last-child(2)').find("input").val());
+                    var myvalTotal = parseInt($(this).find('td:last-child').find("input").val());
+                    totalNetFlowValue += myvalFlow;
+                    totalGroupValue += myvalTotal;
+                });
+
+                
+                  totalRow.last().find('td:nth-last-child(2)').find("input").val(totalNetFlowValue);
+                  totalRow.last().find('td:last-child').find("input").val(totalGroupValue);
+               
+
+            });
+          
             $("#MontlyInputGrid td:nth-child(1)").hide();
             $("#MontlyInputGrid td:nth-child(2)").hide();  
 
@@ -231,10 +423,7 @@
                         ytdValue = parseFloat($(txt).attr("value"));
                     }
                 }
-
-                console.log(ytdValue);
-                console.log(value);
-                console.log(existingValue);
+                              
 
                 $(this).closest("tr").find('input[productId="ytd-' + prod + '"]').val(ytdValue + value - existingValue);
                 if ($(this).closest("tr").find('input[productId="ytd-' + prod + '"]').closest('table').attr('id') == "SurgeryGrid") {
@@ -247,7 +436,7 @@
 
                 var prod = $(this).attr('productId');
                 var grid = $(this).closest('table').attr('id');
-                console.log(grid);
+                //console.log(grid);
                 var colSum = 0;
                 
                 $('#' + grid + ' input[productId=' + prod + ']').each(function (index) {
@@ -312,8 +501,9 @@
 
        <nav class="navbar navbar-default navbar-top" style="margin-bottom:2px">
                     <div class="container">
-                        <div class="navbar-header">                         
-                             <a class="navbar-brand" href="#">NovoSeven&reg; Patient Count</a>
+                        <div class="navbar-header">  
+                                                     <a class="navbar-brand" href="#"><img src="/img/nn.png" style="height: 50px;float:left;margin-top:-17px"/>   NovoSeven&reg; patient estimation</a>                       
+                        
                          </div>                   
                         <div id="navbar" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav">                             
@@ -336,12 +526,12 @@
          <div class="row">
             <div>
                    <div class="col-md-6">  
-                       <h4>
+                       <h3>
                           <asp:Label ID="inputLabel" runat="server" Text="Monthly Input"></asp:Label>   
-                       </h4>                   
+                       </h3>                   
                    </div> 
                    <div class="col-md-6"> 
-                       <div class="pull-right">
+                       <div class="pull-right" style="margin-top:15px;">
                            <label>Country:</label>
                            <asp:DropDownList CssClass="btn btn-default" style="margin-right:20px" AutoPostBack="true" OnSelectedIndexChanged="countriesDdl_SelectedIndexChanged" ID="countriesDdl" runat="server"></asp:DropDownList>
                            <label>Period:</label>
@@ -366,8 +556,7 @@
                                 <asp:BoundField DataField="ProductGroupId" ItemStyle-CssClass="productGroup" ReadOnly="true"  HeaderText="id" SortExpression="id" />                                                                                 
                                 <asp:BoundField DataField="ProductType" ItemStyle-Width="85" ItemStyle-HorizontalAlign="Left" ReadOnly="true" HeaderText="Category" />
                                 <asp:BoundField DataField="Product" ItemStyle-Width="175" ItemStyle-HorizontalAlign="Left" ReadOnly="true"  HeaderText="Product" SortExpression="Value" />                                      
-                                <asp:BoundField DataField="Value" ItemStyle-Width="35" ItemStyle-CssClass="startCol" ReadOnly="true"  HeaderText="Value" SortExpression="Value" />
-                               
+                                <asp:BoundField DataField="Value" ItemStyle-Width="35" ItemStyle-CssClass="startCol" ReadOnly="true" NullDisplayText="0"  HeaderText="Value" SortExpression="Value" />
                             </Columns>                    
                        </asp:GridView>                   
                 </div>
@@ -376,7 +565,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="saveBtn_Click" GridID="MontlyInputGrid" ID="saveBtn" runat="server" Text="Save CH" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="saveBtn_Click" GridID="MontlyInputGrid" ID="saveBtn" runat="server" Text="Save Congenital Haemophilia" />                       
                      </div>
                 </div>
            </div>
@@ -397,7 +586,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="PatientsGrid" ID="btnSavePatients" runat="server" Text="Save Pat" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="PatientsGrid" ID="btnSavePatients" runat="server" Text="Save ITI and clinical trial" />                       
                      </div>
                 </div>
            </div>
@@ -418,7 +607,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="AHGrid" ID="btnSaveAH" runat="server" Text="Save AH" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="AHGrid" ID="btnSaveAH" runat="server" Text="Save Acquired Haemophilia" />                       
                      </div>
                 </div>
            </div>
@@ -440,7 +629,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="SurgeryGrid" ID="btnSaveSurgery" runat="server" Text="Save SH" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="SurgeryGrid" ID="btnSaveSurgery" runat="server" Text="Save Surgery" />                       
                      </div>
                 </div>
            </div>
@@ -462,7 +651,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="FactorGrid" ID="btnSaveFactor" runat="server" Text="Save Factor" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="FactorGrid" ID="btnSaveFactor" runat="server" Text="Save Factor VII Deficiency" />                       
                      </div>
                 </div>
            </div>
@@ -482,7 +671,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="thrombosisGrid" ID="btnSaveThrombosis" runat="server" Text="Save GT" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="thrombosisGrid" ID="btnSaveThrombosis" runat="server" Text="Save Glanzmann's Thrombasthenia" />                       
                      </div>
                 </div>
            </div>
@@ -502,7 +691,7 @@
           <div class="row">
                 <div class="col-md-12">
                     <div class="pull-right">
-                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="AgeSplitGrid" ID="btnSaveAgeSplit" runat="server" Text="Save AS" />                       
+                        <asp:Button class="btn btn-default disabled" OnClick="btnSaveData_Click" GridID="AgeSplitGrid" ID="btnSaveAgeSplit" runat="server" Text="Save Age split" />                       
                      </div>
                 </div>
            </div>

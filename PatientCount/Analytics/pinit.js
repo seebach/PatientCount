@@ -1,6 +1,12 @@
 
 var appid = '92eddd16-d58b-4d0d-ae9d-29412c189b44';
-var apiServer = 'http://appdkba1787/backend';
+
+// Must be dynamic and ideally from 
+
+//var apiServer = 'http://appdkba1787/backend';
+//var apiServer = 'http://novo7pem/backend';
+var apiServer = window.location.protocol + '//' + window.location.host + '/backend';
+
 var qlikServer = 'avzappnlam0022n.corp.novocorp.net';
 var app = {};
 // array to keep all elements to in saved in
@@ -133,7 +139,11 @@ $(document).ready(function() {
             selection = [];
             //$('#Sheets').find('selected').remove()
             $('#Sheets').prop('selectedIndex', -1);
-            setTimeout(function(){ updateObjects(); }, 3000);
+            setTimeout(function () { updateObjects(); }, 3000);
+
+            
+
+           
 
         });
 
@@ -142,7 +152,7 @@ $(document).ready(function() {
             updateObjects();
         });
 
-
+       
 
         function showSheetObjects(sheetGuid) {
             //    var sheetGuid = $("#Sheets option:selected").data("sheetGuid");
@@ -227,9 +237,9 @@ $(document).ready(function() {
             $(document).on('click', "#show-details", function() {
                 window.open(  (config.isSecure ? "https://" : "https://") + config.host + (config.port ? ":" + config.port : "") + "/sense/app/"+appid +'/sheet/'+sheetId[0].sheetGuid);
             });
-            qlik.resize();
-            $('#QSZOOM').show();
-            $('#QSZOOM').resize();
+         //   qlik.resize();
+         //   $('#QSZOOM').show();
+         //   $('#QSZOOM').resize();
             //app.visualization.get(qsid).resize();
             app.visualization.get(qsid).then(function(object){
           		object.resize();
@@ -291,7 +301,44 @@ $(document).ready(function() {
             showSheetObjects( sheetList[sheetCounter]); // give us back the item of where we are now
         });
         //var app = qlik.openApp('8c01277a-aae5-4f9c-94c7-b02de896fe7e', config);
-        var app = qlik.openApp(appid, config);
+            var app = qlik.openApp(appid, config);
+
+            app.getObject('filtersRegion', 'bpJdmp');
+            app.getObject('filtersCountry', 'SbVqnp');
+
+            var fieldValues = app.field("Country").getData();
+            fieldValues.OnData.bind(function () {
+                console.info(fieldValues.rows.length);
+                if (fieldValues.rows.length <= 1) {
+                    $('#filters').hide();
+                }
+            });
+
+        // Export data from the ExportTable
+            var exportObject = app.getObject('0444edc7-9cda-4b40-b02c-d47eb2f3ec03');
+            var exportObject2 = app.getObject('sXnpAYd');
+            var qTable = qlik.table(exportObject);
+            var qTable2 = qlik.table(exportObject2);
+
+            // Must manually create export url as the url must point to the Sense server
+            $('#exportData').bind('click', function () {
+                // console.log('export clicked');
+                qTable.exportData({ download: false, filename: 'DataExportChwI', format: 'OOXML' },
+                    function (reply) {
+                        // Only https allowed om the Sense server
+                        var url = "https://" + qlikServer + reply;
+                        // console.log(url);
+                        window.open(url);
+                    });
+
+                qTable2.exportData({ download: false, filename: 'DataExportOtherData', format: 'OOXML' },
+                    function (reply) {
+                        // Only https allowed om the Sense server
+                        var url = "https://" + qlikServer + reply;
+                        // console.log(url);
+                        window.open(url);
+                    });
+            });
 
         app.getList('sheet', function(reply) {
             count = 0;

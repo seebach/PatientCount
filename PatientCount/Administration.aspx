@@ -377,9 +377,9 @@ $(document).ready(function () {
           
             <nav class="navbar navbar-default navbar-top" style="margin-bottom:2px">
                     <div class="container">
-                        <div class="navbar-header">                         
-                             <a class="navbar-brand" href="#">NovoSeven&reg; Estimation Model</a>
-                         </div>                   
+                        <div class="navbar-header">       
+                               <a class="navbar-brand" href="#"><img src="/img/nn.png" style="height: 50px;float:left;margin-top:-17px"/>   NovoSeven&reg; patient estimation</a>
+                          </div>                   
                         <div id="navbar" class="navbar-collapse collapse">
                             <ul class="nav navbar-nav">                             
                                 <li ><a href="Index.aspx">Home</a></li>
@@ -402,10 +402,15 @@ $(document).ready(function () {
                   
             <section aria-labelledby="Manage Users">
                 <div class="row">
-			        <h1 class="page-header" id="usersSection">Manage Users</h1>
-                    <p class="tableptext">Manage Users by updating entries in the form below. A user must have a valid username and email. Set the countries for which the users can input monthly reports.
+			        <h3 class="page-header" style="margin-top:20px;" id="usersSection">Manage Users</h3>
+                        <ul>
+                            <li>A user must have a valid username and email.</li>
+                            <li>A user with Admin access can access to the administration page.  A user with User access can access to data input and report page only.</li>
+                            <li>A User can input and see the data of the countries defined in “countries” column.</li>
+                        </ul>
+                  <%--  <p class="tableptext">Manage Users by updating entries in the form below. A user must have a valid username and email. Set the countries for which the users can input monthly reports.
                         The flag Is Admin gives the user access to the administration page and the flag Is User gives access to the monthly page. To disable a user remove both flags from the user.
-                    </p>
+                    </p>--%>
                 </div>
                 <div class="row">
                     <table id="Users" class="stripe" cellspacing="0" width="100%">
@@ -429,9 +434,15 @@ $(document).ready(function () {
 
             <section>
                 <div class="row">
-			        <h1 class="page-header" id="productsSection">Manage Products</h1>
-                    <p class="tableptext">Manage prodcuts by updating entries in the form below. A pountry no longer used in input forms
-                         should be disabled, which will remove the product from input forms and selections but keep historical values entered for the product</p>
+			        <h3 class="page-header" id="productsSection">Manage Products</h3>
+                    <ul>
+                        <li>Product is the name that feeds into each form.  In case of PPx treatment, product of BTB treatment is added (e.g. ACE910 with NovoSeven® BTB)</li>
+                        <li>Product type is either OnD or PPx.</li>
+                        <li>A product no longer used in input forms should be disabled by deselecting “active”, which will remove the product from input forms and selections.  However, it keeps historical values entered for the product.</li>
+                    </ul>
+
+                    <%--<p class="tableptext">Manage prodcuts by updating entries in the form below. A pountry no longer used in input forms
+                         should be disabled, which will remove the product from input forms and selections but keep historical values entered for the product</p>--%>
                 </div>
                 <div class="row">
                     <table id="products" class="stripe" cellspacing="0" width="100%">
@@ -455,9 +466,9 @@ $(document).ready(function () {
            
             <section> 
                  <div class="row">
-			         <h1 class="page-header" id="countryformSection">Manage Products per Country per Form</h1>
+			         <h3 class="page-header" id="countryformSection">Manage Products per Country per Form</h3>
                      <p class="tableptext">
-                         lore ipsum
+                         Assign products to each form per country by updating entries in the form. 
                      </p>
                  </div>
                  <div class="row">
@@ -481,7 +492,7 @@ $(document).ready(function () {
 
             <section>
                 <div class="row">
-			        <h1 class="page-header" id="productgroupSection">Manage Product Groups</h1>
+			        <h3 class="page-header" id="productgroupSection">Manage Product Groups</h3>
                     <p class="tableptext"> Manage Product groups by updating entries in the form below. Product groups are used to group products and are used in aggregations in forms and reports. </p>
                 </div>
                  <div class="row">
@@ -502,8 +513,12 @@ $(document).ready(function () {
 
             <section>
                 <div class="row">
-			        <h1 class="page-header" id="regionsSection">Manage Regions</h1>
-                    <p class="tableptext"> Manage Regions by updating entries in the form below. Regions are used to group countries for easier administration and for reporting purposes. </p>
+			        <h3 class="page-header" id="regionsSection">Manage Regions</h3>
+                    <ul>
+                        <li>Regions here are Novo Nordisk  Regions.</li>
+                        <li>Regions are used for reporting and for easier administration.</li>
+                    </ul>
+                    <%--<p class="tableptext"> Manage Regions by updating entries in the form below. Regions are used to group countries for easier administration and for reporting purposes. </p>--%>
                 </div>
                  <div class="row">
                     <table id="example" class="stripe">
@@ -523,10 +538,14 @@ $(document).ready(function () {
 
             <section> 
                  <div class="row">
-			         <h1 class="page-header" id="countriesSection">Manage Countries</h1>
-                     <p class="tableptext"> Manage Countries by updating entries in the form below. A country can be linked to only one region. A country no longer used in input forms
+			         <h3 class="page-header" id="countriesSection">Manage Countries</h3>
+                     <ul>
+                         <li>A country can be linked to only one region.</li>
+                         <li>A country no longer used in input forms should be disabled by deselecting “active”, which will remove the country from input forms and selections. However, it keeps historical values entered for the country.</li>
+                     </ul>
+                     <%--<p class="tableptext"> Manage Countries by updating entries in the form below. A country can be linked to only one region. A country no longer used in input forms
                          should be disabled, which will remove the country from input forms and selections but keep historical values entered for the country. 
-                     </p>
+                     </p>--%>
                  </div>
                  <div class="row">
                     <table id="countries" class="stripe" cellspacing="0" width="100%">

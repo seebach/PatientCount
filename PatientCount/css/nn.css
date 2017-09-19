@@ -1,0 +1,49 @@
+/*
+Standard Novo Colors 
+*/
+.row {
+    font-size: 11px;
+    font-family: verdana,arial,helvetica,sans-serif !important;
+    color: #000000;
+}
+
+#bootstrap-overrides h1 {
+    font-size: 1.6em;
+    font-family: verdana,arial,helvetica,sans-serif !important;
+    color: #001965;
+    font-weight: bold;
+}
+#bootstrap-overrides h2 {
+    font-size: 1.5em;
+    font-family: verdana,arial,helvetica,sans-serif !important;
+    color: #001965;
+    font-weight: bold;
+}
+#bootstrap-overrides h3 {
+    font-size: 1.4em;
+    font-family: verdana,arial,helvetica,sans-serif !important;
+    color: #000000;
+}
+.navbar-default {
+    background-color: #e0ddd8;
+}
+.navbar-default .navbar-nav>.active>a
+, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover 
+ {
+    background-color: #f7f7f5;
+} 
+.navbar-default .navbar-nav>.active>a:hover
+/*, .navbar-default .navbar-nav>.active>a:focus, .navbar-default .navbar-nav>.active>a:hover */
+ {
+    color: #000;
+} 
+.navbar-default .navbar-brand , .navbar-default .navbar-nav>li>a{
+    color: #505050;
+}
+.dataTables_wrapper .dataTables_filter input {
+    margin-left: 0.5em;
+    border: 1px solid #CCC;
+}
+.btn {
+    font-size: 11px;
+}

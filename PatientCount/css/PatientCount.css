@@ -94,4 +94,9 @@ div.DTE_Body div.DTE_Body_Content div.DTE_Field>div.DTE_Field_Input {
     float: right;
     width: 70% !important;
 }
+
+
+li:before{
+    color: red;
+}
     
